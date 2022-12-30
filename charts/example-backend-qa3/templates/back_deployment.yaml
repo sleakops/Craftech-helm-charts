@@ -1,0 +1,80 @@
+{{- if .Values.back.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "example-backend.fullname" . }}-back
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: back
+spec:
+  replicas: {{ .Values.back.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/component: back
+  template:
+    metadata:
+      annotations:
+        timestamp: "{{ .Values.global.timestamp }}"
+      labels:
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+        app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/component: back
+    spec:
+      {{ template "back.affinity" . }}
+      {{ template "back.tolerations" . }}
+      {{ template "back.nodeselector" . }}
+      {{ template "back.hostAliases" . }}
+      terminationGracePeriodSeconds: {{ .Values.back.terminationGracePeriodSeconds | default 300 }}
+      containers:
+        - name: example-backend
+          image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          {{- if .Values.back.command }}
+          command: {{- toYaml .Values.back.command | nindent 10 }}
+          args: {{ .Values.back.args }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.back.service.targetPort | default 80 }}
+              protocol: TCP
+          {{- if .Values.back.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.back.service.port }}
+            initialDelaySeconds: {{ .Values.back.readinessProbe.initialDelaySeconds}}
+            timeoutSeconds: {{ .Values.back.readinessProbe.timeoutSeconds}}
+            periodSeconds: 5
+            successThreshold: 1
+          {{- end }}
+          {{ template "back.resources" . }}
+          {{- if .Values.back.envFrom }}
+          envFrom:
+          {{- toYaml .Values.back.envFrom | nindent 10 }}
+          {{- end }}
+          env:
+          {{ if .Values.global.datadog.enabled }}
+          - name: DATADOG_TRACE_AGENT_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          {{ end }}
+          {{- include "back.extraEnvironmentVars" .Values.back | nindent 10 }}
+          {{- include "back.extraSecretEnvironmentVars" .Values.back | nindent 10 }}
+         {{ template "back.mounts" . }}
+         {{ template "back.volumes" . }}
+{{- end }}

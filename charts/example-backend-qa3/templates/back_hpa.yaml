@@ -1,0 +1,21 @@
+{{- if and .Values.back.enabled .Values.back.autoscaling.enabled }}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: back
+  name: {{ template "example-backend.fullname" . }}-back
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-back
+  minReplicas: {{ .Values.back.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.back.autoscaling.maxReplicas }}
+  targetCPUUtilizationPercentage: {{ .Values.back.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}

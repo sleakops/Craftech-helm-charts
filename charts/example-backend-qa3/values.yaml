@@ -1,0 +1,74 @@
+back:
+  affinity: null
+  autoscaling:
+    enabled: false
+    maxReplicas: 3
+    minReplicas: 1
+    targetCPUUtilizationPercentage: 50
+    targetMemoryUtilizationPercentage: 50
+  commandPath: config.wsgi:application
+  dev:
+    enabled: true
+  enabled: true
+  envFrom: null
+  extraEnvironmentVars: {}
+  extraSecretEnvironmentVars: []
+  ingress:
+    annotations: 'alb.ingress.kubernetes.io/scheme: internet-facing
+
+      alb.ingress.kubernetes.io/target-type: ip
+
+      alb.ingress.kubernetes.io/healthcheck-port: ''8000''
+
+      alb.ingress.kubernetes.io/success-codes: ''404''
+
+      '
+    enabled: false
+    hosts:
+    - host: api.example.com
+      paths:
+      - path: /
+        pathType: Prefix
+    ingressClassName: alb
+    labels: {}
+    tls:
+      hosts:
+      - api.example.com
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 60
+    path: /v1/sys/health?standbyok=true
+  nodeSelector: {}
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 120
+    timeoutSeconds: 30
+  replicas: 0
+  resources: {}
+  service:
+    annotations: {}
+    enabled: true
+    healthcheck:
+      enabled: false
+      livenessProbe:
+        enabled: true
+        path: /health/ready
+      readinessProbe:
+        enabled: true
+        path: null
+    port: 8000
+    targetPort: 8000
+  terminationGracePeriodSeconds: 300
+  tolerations: null
+global:
+  datadog:
+    enabled: false
+  enabled: true
+  externalSecrets:
+    enabled: false
+  image:
+    pullPolicy: Always
+    repository: ''
+    tag: latest
+  namespace: example-backend-qa3
+  projectName: example-backend

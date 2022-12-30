@@ -1,0 +1,23 @@
+{{- if and .Values.back.enabled .Values.back.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "example-backend.fullname" . }}-back-svc
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: back
+spec:
+  ports:
+  - port: {{ .Values.back.service.port }}
+    targetPort: {{ .Values.back.service.targetPort }}
+  selector:
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-back
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: back
+{{- end }}
