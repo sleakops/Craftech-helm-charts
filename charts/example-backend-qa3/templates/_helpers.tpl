@@ -174,31 +174,31 @@ Set's the container resources if the user has set any.
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# w1      
+# kkk      
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "w1.resources" -}}
-  {{- if .w1.resources -}}
+{{- define "kkk.resources" -}}
+  {{- if .kkk.resources -}}
           resources:
-{{ toYaml .w1.resources | indent 12}}
+{{ toYaml .kkk.resources | indent 12}}
   {{ else }}
           resources:
-{{ toYaml .Values.w1.resources | indent 12}}
+{{ toYaml .Values.kkk.resources | indent 12}}
   {{- end -}}
 {{- end -}}
 
-{{- define "example-backend.w1" -}}
-{{- if .w1.enabled -}}
+{{- define "example-backend.kkk" -}}
+{{- if .kkk.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
-  replicas: {{ .w1.replicas | default 0 }}
+  replicas: {{ .kkk.replicas | default 0 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -206,22 +206,22 @@ spec:
       maxUnavailable: 25%
   selector:
     matchLabels:
-      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
   template:
     metadata:
       annotations:
         timestamp: "{{ .Values.global.timestamp }}"
       labels:
-        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
     spec:
-      terminationGracePeriodSeconds: {{ .w1.terminationGracePeriodSeconds | default 300 }}
+      terminationGracePeriodSeconds: {{ .kkk.terminationGracePeriodSeconds | default 300 }}
       containers:
-        - name: {{ .w1.config.containerName | default "celery" }}
+        - name: {{ .kkk.config.containerName | default "celery" }}
           image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-          {{- if .Values.w1.command }}
-          command: {{- toYaml .Values.w1.command | nindent 10 }}
-          args: {{ .Values.w1.args }}
+          {{- if .Values.kkk.command }}
+          command: {{- toYaml .Values.kkk.command | nindent 10 }}
+          args: {{ .Values.kkk.args }}
           {{- end }}
           {{- if .Values.api.readinessProbe.enabled }}
           readinessProbe:
@@ -229,15 +229,15 @@ spec:
               command:
               - "/bin/sh"
               - "-c"
-              - {{ .w1.readinessProbe.command | quote }}
-            initialDelaySeconds: {{ .w1.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .w1.readinessProbe.timeoutSeconds }}
-            periodSeconds: {{ .w1.readinessProbe.periodSeconds }}
+              - {{ .kkk.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .kkk.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .kkk.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .kkk.readinessProbe.periodSeconds }}
           {{- end }}
-          {{ template "w1.resources" . }}
-          {{- if .Values.w1.envFrom }}
+          {{ template "kkk.resources" . }}
+          {{- if .Values.kkk.envFrom }}
           envFrom:
-          {{- toYaml .Values.w1.envFrom | nindent 10 }}
+          {{- toYaml .Values.kkk.envFrom | nindent 10 }}
           {{- end }}
           env:
           - name: HOSTNAME
@@ -245,18 +245,18 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
 
-          {{- if .w1.extraEnvironmentVars -}}
-          {{- range $key, $value := .w1.extraEnvironmentVars }}
+          {{- if .kkk.extraEnvironmentVars -}}
+          {{- range $key, $value := .kkk.extraEnvironmentVars }}
           - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
             value: {{ $value | quote }}
           {{- end -}}
           {{- end -}}
-    {{ if .w1.nodeSelector }}
+    {{ if .kkk.nodeSelector }}
       nodeSelector:
-        {{ toYaml .w1.nodeSelector }}
-    {{ else if .Values.w1.nodeSelector }}
+        {{ toYaml .kkk.nodeSelector }}
+    {{ else if .Values.kkk.nodeSelector }}
       nodeSelector:
-        {{ toYaml .Values.w1.nodeSelector  }}
+        {{ toYaml .Values.kkk.nodeSelector  }}
     {{ else -}}
     {{- end }}
 ---
@@ -266,36 +266,36 @@ spec:
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "example-backend.w1.hpa" -}}
-  {{- if .w1.enabled -}}
-  {{- if .w1.hpa -}}
+{{- define "example-backend.kkk.hpa" -}}
+  {{- if .kkk.enabled -}}
+  {{- if .kkk.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
-  minReplicas: {{ .w1.hpa.min }}
-  maxReplicas: {{ .w1.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .w1.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
+  minReplicas: {{ .kkk.hpa.min }}
+  maxReplicas: {{ .kkk.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .kkk.hpa.cpuPorcentage }}
 ---
-  {{- else if .Values.w1.hpa -}}
+  {{- else if .Values.kkk.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .w1.name }}
-  minReplicas: {{ .Values.w1.hpa.min }}
-  maxReplicas: {{ .Values.w1.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .Values.w1.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .kkk.name }}
+  minReplicas: {{ .Values.kkk.hpa.min }}
+  maxReplicas: {{ .Values.kkk.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.kkk.hpa.cpuPorcentage }}
 ---
   {{ else }}
   {{ end }}
