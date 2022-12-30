@@ -174,31 +174,31 @@ Set's the container resources if the user has set any.
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# www      
+# uuu      
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "www.resources" -}}
-  {{- if .www.resources -}}
+{{- define "uuu.resources" -}}
+  {{- if .uuu.resources -}}
           resources:
-{{ toYaml .www.resources | indent 12}}
+{{ toYaml .uuu.resources | indent 12}}
   {{ else }}
           resources:
-{{ toYaml .Values.www.resources | indent 12}}
+{{ toYaml .Values.uuu.resources | indent 12}}
   {{- end -}}
 {{- end -}}
 
-{{- define "example-backend.www" -}}
-{{- if .www.enabled -}}
+{{- define "example-backend.uuu" -}}
+{{- if .uuu.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
-  replicas: {{ .www.replicas | default 0 }}
+  replicas: {{ .uuu.replicas | default 0 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -206,22 +206,22 @@ spec:
       maxUnavailable: 25%
   selector:
     matchLabels:
-      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
   template:
     metadata:
       annotations:
         timestamp: "{{ .Values.global.timestamp }}"
       labels:
-        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
     spec:
-      terminationGracePeriodSeconds: {{ .www.terminationGracePeriodSeconds | default 300 }}
+      terminationGracePeriodSeconds: {{ .uuu.terminationGracePeriodSeconds | default 300 }}
       containers:
-        - name: {{ .www.config.containerName | default "celery" }}
+        - name: {{ .uuu.config.containerName | default "celery" }}
           image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-          {{- if .Values.www.command }}
-          command: {{- toYaml .Values.www.command | nindent 10 }}
-          args: {{ .Values.www.args }}
+          {{- if .Values.uuu.command }}
+          command: {{- toYaml .Values.uuu.command | nindent 10 }}
+          args: {{ .Values.uuu.args }}
           {{- end }}
           {{- if .Values.api.readinessProbe.enabled }}
           readinessProbe:
@@ -229,15 +229,15 @@ spec:
               command:
               - "/bin/sh"
               - "-c"
-              - {{ .www.readinessProbe.command | quote }}
-            initialDelaySeconds: {{ .www.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .www.readinessProbe.timeoutSeconds }}
-            periodSeconds: {{ .www.readinessProbe.periodSeconds }}
+              - {{ .uuu.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .uuu.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .uuu.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .uuu.readinessProbe.periodSeconds }}
           {{- end }}
-          {{ template "www.resources" . }}
-          {{- if .Values.www.envFrom }}
+          {{ template "uuu.resources" . }}
+          {{- if .Values.uuu.envFrom }}
           envFrom:
-          {{- toYaml .Values.www.envFrom | nindent 10 }}
+          {{- toYaml .Values.uuu.envFrom | nindent 10 }}
           {{- end }}
           env:
           - name: HOSTNAME
@@ -245,18 +245,18 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
 
-          {{- if .www.extraEnvironmentVars -}}
-          {{- range $key, $value := .www.extraEnvironmentVars }}
+          {{- if .uuu.extraEnvironmentVars -}}
+          {{- range $key, $value := .uuu.extraEnvironmentVars }}
           - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
             value: {{ $value | quote }}
           {{- end -}}
           {{- end -}}
-    {{ if .www.nodeSelector }}
+    {{ if .uuu.nodeSelector }}
       nodeSelector:
-        {{ toYaml .www.nodeSelector }}
-    {{ else if .Values.www.nodeSelector }}
+        {{ toYaml .uuu.nodeSelector }}
+    {{ else if .Values.uuu.nodeSelector }}
       nodeSelector:
-        {{ toYaml .Values.www.nodeSelector  }}
+        {{ toYaml .Values.uuu.nodeSelector  }}
     {{ else -}}
     {{- end }}
 ---
@@ -266,36 +266,36 @@ spec:
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "example-backend.www.hpa" -}}
-  {{- if .www.enabled -}}
-  {{- if .www.hpa -}}
+{{- define "example-backend.uuu.hpa" -}}
+  {{- if .uuu.enabled -}}
+  {{- if .uuu.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
-  minReplicas: {{ .www.hpa.min }}
-  maxReplicas: {{ .www.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .www.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+  minReplicas: {{ .uuu.hpa.min }}
+  maxReplicas: {{ .uuu.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .uuu.hpa.cpuPorcentage }}
 ---
-  {{- else if .Values.www.hpa -}}
+  {{- else if .Values.uuu.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .www.name }}
-  minReplicas: {{ .Values.www.hpa.min }}
-  maxReplicas: {{ .Values.www.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .Values.www.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+  minReplicas: {{ .Values.uuu.hpa.min }}
+  maxReplicas: {{ .Values.uuu.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.uuu.hpa.cpuPorcentage }}
 ---
   {{ else }}
   {{ end }}

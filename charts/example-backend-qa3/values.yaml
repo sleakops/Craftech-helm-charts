@@ -72,7 +72,7 @@ global:
     tag: latest
   namespace: example-backend-qa3
   projectName: example-backend
-www:
+uuu:
   command_args: null
   enabled: true
   envFrom: null
