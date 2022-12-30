@@ -1,7 +1,0 @@
-{{- if .Values.w1.enabled -}}
-{{- range $key, $val := .Values.w1.items -}}
-{{$data := dict "Values" $.Values "w1" $val}}
-{{- include "example-backend.w1" $data -}}
-{{- include "example-backend.w1.hpa" $data -}}
-{{- end -}}
-{{- end -}}

@@ -1,7 +1,0 @@
-{{- if .Values.eeee.enabled -}}
-{{- range $key, $val := .Values.eeee.items -}}
-{{$data := dict "Values" $.Values "eeee" $val}}
-{{- include "example-backend.eeee" $data -}}
-{{- include "example-backend.eeee.hpa" $data -}}
-{{- end -}}
-{{- end -}}

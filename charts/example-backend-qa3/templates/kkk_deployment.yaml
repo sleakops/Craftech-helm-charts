@@ -1,7 +1,0 @@
-{{- if .Values.kkk.enabled -}}
-{{- range $key, $val := .Values.kkk.items -}}
-{{$data := dict "Values" $.Values "kkk" $val}}
-{{- include "example-backend.kkk" $data -}}
-{{- include "example-backend.kkk.hpa" $data -}}
-{{- end -}}
-{{- end -}}
