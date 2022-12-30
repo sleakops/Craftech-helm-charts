@@ -72,6 +72,38 @@ global:
     tag: latest
   namespace: example-backend-qa3
   projectName: example-backend
+iiii:
+  command_args: null
+  enabled: true
+  envFrom: null
+  flower:
+    enabled: true
+    ingress:
+      annotations: {}
+      enabled: true
+      host: flower-api.internal.moni.com.ar
+      ingressClassName: alb-ingress
+  items:
+  - config:
+      app_location: config
+      concurrency: 2
+      extraArgs: -E
+      loglevel: ERROR
+      queues: bulk,test
+    enabled: true
+    extraEnvironmentVars: []
+    is_beat: false
+    name: bulk
+    nodeSelector: null
+    readinessProbe:
+      command: celery inspect ping -A config -d celery@$HOSTNAME
+      initialDelaySeconds: 120
+      periodSeconds: 5
+      timeoutSeconds: 30
+    replicas: 0
+    resources: {}
+  nodeSelector: null
+  resources: {}
 uuu:
   command_args: null
   enabled: true
