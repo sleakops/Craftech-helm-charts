@@ -14,6 +14,16 @@ entries:
   example-backend-qa3:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-12-30T02:12:24.271916107Z"
+    description: A Helm chart for Kubernetes
+    digest: 41c37d5247ebf1a96f9c640d84cfbf78d86892255b79014bfc4a4644080de0b0
+    name: example-backend-qa3
+    type: application
+    urls:
+    - https://github.com/sleakops/Craftech-helm-charts/releases/download/example-backend-qa3-1.6.0/example-backend-qa3-1.6.0.tgz
+    version: 1.6.0
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-12-30T02:09:02.896465019Z"
     description: A Helm chart for Kubernetes
     digest: 9bb77acaf26285d6a76f043d7a255eb811f39f277df89655c1464b7e59a6bcf1
@@ -72,4 +82,4 @@ entries:
     urls:
     - https://github.com/sleakops/Craftech-helm-charts/releases/download/example-backend-qa3-1.0.0/example-backend-qa3-1.0.0.tgz
     version: 1.0.0
-generated: "2022-12-30T02:09:02.896481519Z"
+generated: "2022-12-30T02:12:24.272109512Z"
