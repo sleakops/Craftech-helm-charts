@@ -1,0 +1,7 @@
+{{- if .Values.ccccc.enabled -}}
+{{- range $key, $val := .Values.ccccc.items -}}
+{{$data := dict "Values" $.Values "ccccc" $val}}
+{{- include "example-backend.ccccc" $data -}}
+{{- include "example-backend.ccccc.hpa" $data -}}
+{{- end -}}
+{{- end -}}

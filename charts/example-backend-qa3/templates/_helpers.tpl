@@ -432,3 +432,133 @@ spec:
   {{ end }}
 {{- end -}}
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ccccc      
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "ccccc.resources" -}}
+  {{- if .ccccc.resources -}}
+          resources:
+{{ toYaml .ccccc.resources | indent 12}}
+  {{ else }}
+          resources:
+{{ toYaml .Values.ccccc.resources | indent 12}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "example-backend.ccccc" -}}
+{{- if .ccccc.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .ccccc.replicas | default 0 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+  template:
+    metadata:
+      annotations:
+        timestamp: "{{ .Values.global.timestamp }}"
+      labels:
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+    spec:
+      terminationGracePeriodSeconds: {{ .ccccc.terminationGracePeriodSeconds | default 300 }}
+      containers:
+        - name: {{ .ccccc.config.containerName | default "celery" }}
+          image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          {{- if .Values.ccccc.command }}
+          command: {{- toYaml .Values.ccccc.command | nindent 10 }}
+          args: {{ .Values.ccccc.args }}
+          {{- end }}
+          {{- if .Values.api.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+              - "-c"
+              - {{ .ccccc.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .ccccc.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .ccccc.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .ccccc.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{ template "ccccc.resources" . }}
+          {{- if .Values.ccccc.envFrom }}
+          envFrom:
+          {{- toYaml .Values.ccccc.envFrom | nindent 10 }}
+          {{- end }}
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+
+          {{- if .ccccc.extraEnvironmentVars -}}
+          {{- range $key, $value := .ccccc.extraEnvironmentVars }}
+          - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
+            value: {{ $value | quote }}
+          {{- end -}}
+          {{- end -}}
+    {{ if .ccccc.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .ccccc.nodeSelector }}
+    {{ else if .Values.ccccc.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .Values.ccccc.nodeSelector  }}
+    {{ else -}}
+    {{- end }}
+---
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "example-backend.ccccc.hpa" -}}
+  {{- if .ccccc.enabled -}}
+  {{- if .ccccc.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+  minReplicas: {{ .ccccc.hpa.min }}
+  maxReplicas: {{ .ccccc.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .ccccc.hpa.cpuPorcentage }}
+---
+  {{- else if .Values.ccccc.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ccccc.name }}
+  minReplicas: {{ .Values.ccccc.hpa.min }}
+  maxReplicas: {{ .Values.ccccc.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.ccccc.hpa.cpuPorcentage }}
+---
+  {{ else }}
+  {{ end }}
+  {{ end }}
+{{- end -}}
+
