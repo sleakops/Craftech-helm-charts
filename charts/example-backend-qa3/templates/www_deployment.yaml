@@ -1,0 +1,7 @@
+{{- if .Values.www.enabled -}}
+{{- range $key, $val := .Values.www.items -}}
+{{$data := dict "Values" $.Values "www" $val}}
+{{- include "example-backend.www" $data -}}
+{{- include "example-backend.www.hpa" $data -}}
+{{- end -}}
+{{- end -}}
