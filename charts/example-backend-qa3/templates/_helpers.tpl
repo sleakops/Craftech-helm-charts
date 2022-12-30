@@ -174,31 +174,31 @@ Set's the container resources if the user has set any.
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# uuu      
+# ooo      
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "uuu.resources" -}}
-  {{- if .uuu.resources -}}
+{{- define "ooo.resources" -}}
+  {{- if .ooo.resources -}}
           resources:
-{{ toYaml .uuu.resources | indent 12}}
+{{ toYaml .ooo.resources | indent 12}}
   {{ else }}
           resources:
-{{ toYaml .Values.uuu.resources | indent 12}}
+{{ toYaml .Values.ooo.resources | indent 12}}
   {{- end -}}
 {{- end -}}
 
-{{- define "example-backend.uuu" -}}
-{{- if .uuu.enabled -}}
+{{- define "example-backend.ooo" -}}
+{{- if .ooo.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
-  replicas: {{ .uuu.replicas | default 0 }}
+  replicas: {{ .ooo.replicas | default 0 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -206,22 +206,22 @@ spec:
       maxUnavailable: 25%
   selector:
     matchLabels:
-      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
   template:
     metadata:
       annotations:
         timestamp: "{{ .Values.global.timestamp }}"
       labels:
-        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
     spec:
-      terminationGracePeriodSeconds: {{ .uuu.terminationGracePeriodSeconds | default 300 }}
+      terminationGracePeriodSeconds: {{ .ooo.terminationGracePeriodSeconds | default 300 }}
       containers:
-        - name: {{ .uuu.config.containerName | default "celery" }}
+        - name: {{ .ooo.config.containerName | default "celery" }}
           image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-          {{- if .Values.uuu.command }}
-          command: {{- toYaml .Values.uuu.command | nindent 10 }}
-          args: {{ .Values.uuu.args }}
+          {{- if .Values.ooo.command }}
+          command: {{- toYaml .Values.ooo.command | nindent 10 }}
+          args: {{ .Values.ooo.args }}
           {{- end }}
           {{- if .Values.api.readinessProbe.enabled }}
           readinessProbe:
@@ -229,15 +229,15 @@ spec:
               command:
               - "/bin/sh"
               - "-c"
-              - {{ .uuu.readinessProbe.command | quote }}
-            initialDelaySeconds: {{ .uuu.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .uuu.readinessProbe.timeoutSeconds }}
-            periodSeconds: {{ .uuu.readinessProbe.periodSeconds }}
+              - {{ .ooo.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .ooo.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .ooo.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .ooo.readinessProbe.periodSeconds }}
           {{- end }}
-          {{ template "uuu.resources" . }}
-          {{- if .Values.uuu.envFrom }}
+          {{ template "ooo.resources" . }}
+          {{- if .Values.ooo.envFrom }}
           envFrom:
-          {{- toYaml .Values.uuu.envFrom | nindent 10 }}
+          {{- toYaml .Values.ooo.envFrom | nindent 10 }}
           {{- end }}
           env:
           - name: HOSTNAME
@@ -245,18 +245,18 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
 
-          {{- if .uuu.extraEnvironmentVars -}}
-          {{- range $key, $value := .uuu.extraEnvironmentVars }}
+          {{- if .ooo.extraEnvironmentVars -}}
+          {{- range $key, $value := .ooo.extraEnvironmentVars }}
           - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
             value: {{ $value | quote }}
           {{- end -}}
           {{- end -}}
-    {{ if .uuu.nodeSelector }}
+    {{ if .ooo.nodeSelector }}
       nodeSelector:
-        {{ toYaml .uuu.nodeSelector }}
-    {{ else if .Values.uuu.nodeSelector }}
+        {{ toYaml .ooo.nodeSelector }}
+    {{ else if .Values.ooo.nodeSelector }}
       nodeSelector:
-        {{ toYaml .Values.uuu.nodeSelector  }}
+        {{ toYaml .Values.ooo.nodeSelector  }}
     {{ else -}}
     {{- end }}
 ---
@@ -266,166 +266,36 @@ spec:
 {{/*
 Set's the container resources if the user has set any.
 */}}
-{{- define "example-backend.uuu.hpa" -}}
-  {{- if .uuu.enabled -}}
-  {{- if .uuu.hpa -}}
+{{- define "example-backend.ooo.hpa" -}}
+  {{- if .ooo.enabled -}}
+  {{- if .ooo.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
   namespace: {{ .Values.global.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
-  minReplicas: {{ .uuu.hpa.min }}
-  maxReplicas: {{ .uuu.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .uuu.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
+  minReplicas: {{ .ooo.hpa.min }}
+  maxReplicas: {{ .ooo.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .ooo.hpa.cpuPorcentage }}
 ---
-  {{- else if .Values.uuu.hpa -}}
+  {{- else if .Values.ooo.hpa -}}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .uuu.name }}
-  minReplicas: {{ .Values.uuu.hpa.min }}
-  maxReplicas: {{ .Values.uuu.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .Values.uuu.hpa.cpuPorcentage }}
----
-  {{ else }}
-  {{ end }}
-  {{ end }}
-{{- end -}}
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# iiii      
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-{{/*
-Set's the container resources if the user has set any.
-*/}}
-{{- define "iiii.resources" -}}
-  {{- if .iiii.resources -}}
-          resources:
-{{ toYaml .iiii.resources | indent 12}}
-  {{ else }}
-          resources:
-{{ toYaml .Values.iiii.resources | indent 12}}
-  {{- end -}}
-{{- end -}}
-
-{{- define "example-backend.iiii" -}}
-{{- if .iiii.enabled -}}
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-  namespace: {{ .Values.global.namespace }}
-spec:
-  replicas: {{ .iiii.replicas | default 0 }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 25%
-  selector:
-    matchLabels:
-      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-  template:
-    metadata:
-      annotations:
-        timestamp: "{{ .Values.global.timestamp }}"
-      labels:
-        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-    spec:
-      terminationGracePeriodSeconds: {{ .iiii.terminationGracePeriodSeconds | default 300 }}
-      containers:
-        - name: {{ .iiii.config.containerName | default "celery" }}
-          image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
-          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-          {{- if .Values.iiii.command }}
-          command: {{- toYaml .Values.iiii.command | nindent 10 }}
-          args: {{ .Values.iiii.args }}
-          {{- end }}
-          {{- if .Values.api.readinessProbe.enabled }}
-          readinessProbe:
-            exec:
-              command:
-              - "/bin/sh"
-              - "-c"
-              - {{ .iiii.readinessProbe.command | quote }}
-            initialDelaySeconds: {{ .iiii.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .iiii.readinessProbe.timeoutSeconds }}
-            periodSeconds: {{ .iiii.readinessProbe.periodSeconds }}
-          {{- end }}
-          {{ template "iiii.resources" . }}
-          {{- if .Values.iiii.envFrom }}
-          envFrom:
-          {{- toYaml .Values.iiii.envFrom | nindent 10 }}
-          {{- end }}
-          env:
-          - name: HOSTNAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-
-          {{- if .iiii.extraEnvironmentVars -}}
-          {{- range $key, $value := .iiii.extraEnvironmentVars }}
-          - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
-            value: {{ $value | quote }}
-          {{- end -}}
-          {{- end -}}
-    {{ if .iiii.nodeSelector }}
-      nodeSelector:
-        {{ toYaml .iiii.nodeSelector }}
-    {{ else if .Values.iiii.nodeSelector }}
-      nodeSelector:
-        {{ toYaml .Values.iiii.nodeSelector  }}
-    {{ else -}}
-    {{- end }}
----
-{{- end -}}
-{{- end -}}
-
-{{/*
-Set's the container resources if the user has set any.
-*/}}
-{{- define "example-backend.iiii.hpa" -}}
-  {{- if .iiii.enabled -}}
-  {{- if .iiii.hpa -}}
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-  namespace: {{ .Values.global.namespace }}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-  minReplicas: {{ .iiii.hpa.min }}
-  maxReplicas: {{ .iiii.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .iiii.hpa.cpuPorcentage }}
----
-  {{- else if .Values.iiii.hpa -}}
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .iiii.name }}
-  minReplicas: {{ .Values.iiii.hpa.min }}
-  maxReplicas: {{ .Values.iiii.hpa.max }}
-  targetCPUUtilizationPercentage: {{ .Values.iiii.hpa.cpuPorcentage }}
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .ooo.name }}
+  minReplicas: {{ .Values.ooo.hpa.min }}
+  maxReplicas: {{ .Values.ooo.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.ooo.hpa.cpuPorcentage }}
 ---
   {{ else }}
   {{ end }}

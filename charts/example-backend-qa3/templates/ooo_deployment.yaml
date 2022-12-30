@@ -1,0 +1,7 @@
+{{- if .Values.ooo.enabled -}}
+{{- range $key, $val := .Values.ooo.items -}}
+{{$data := dict "Values" $.Values "ooo" $val}}
+{{- include "example-backend.ooo" $data -}}
+{{- include "example-backend.ooo.hpa" $data -}}
+{{- end -}}
+{{- end -}}
