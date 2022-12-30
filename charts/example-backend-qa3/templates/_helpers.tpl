@@ -562,3 +562,133 @@ spec:
   {{ end }}
 {{- end -}}
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# awdawda      
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "awdawda.resources" -}}
+  {{- if .awdawda.resources -}}
+          resources:
+{{ toYaml .awdawda.resources | indent 12}}
+  {{ else }}
+          resources:
+{{ toYaml .Values.awdawda.resources | indent 12}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "example-backend.awdawda" -}}
+{{- if .awdawda.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .awdawda.replicas | default 0 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+  template:
+    metadata:
+      annotations:
+        timestamp: "{{ .Values.global.timestamp }}"
+      labels:
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+    spec:
+      terminationGracePeriodSeconds: {{ .awdawda.terminationGracePeriodSeconds | default 300 }}
+      containers:
+        - name: {{ .awdawda.config.containerName | default "celery" }}
+          image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          {{- if .Values.awdawda.command }}
+          command: {{- toYaml .Values.awdawda.command | nindent 10 }}
+          args: {{ .Values.awdawda.args }}
+          {{- end }}
+          {{- if .Values.api.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+              - "-c"
+              - {{ .awdawda.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .awdawda.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .awdawda.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .awdawda.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{ template "awdawda.resources" . }}
+          {{- if .Values.awdawda.envFrom }}
+          envFrom:
+          {{- toYaml .Values.awdawda.envFrom | nindent 10 }}
+          {{- end }}
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+
+          {{- if .awdawda.extraEnvironmentVars -}}
+          {{- range $key, $value := .awdawda.extraEnvironmentVars }}
+          - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
+            value: {{ $value | quote }}
+          {{- end -}}
+          {{- end -}}
+    {{ if .awdawda.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .awdawda.nodeSelector }}
+    {{ else if .Values.awdawda.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .Values.awdawda.nodeSelector  }}
+    {{ else -}}
+    {{- end }}
+---
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "example-backend.awdawda.hpa" -}}
+  {{- if .awdawda.enabled -}}
+  {{- if .awdawda.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+  minReplicas: {{ .awdawda.hpa.min }}
+  maxReplicas: {{ .awdawda.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .awdawda.hpa.cpuPorcentage }}
+---
+  {{- else if .Values.awdawda.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .awdawda.name }}
+  minReplicas: {{ .Values.awdawda.hpa.min }}
+  maxReplicas: {{ .Values.awdawda.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.awdawda.hpa.cpuPorcentage }}
+---
+  {{ else }}
+  {{ end }}
+  {{ end }}
+{{- end -}}
+

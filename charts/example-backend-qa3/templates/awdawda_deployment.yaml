@@ -1,0 +1,7 @@
+{{- if .Values.awdawda.enabled -}}
+{{- range $key, $val := .Values.awdawda.items -}}
+{{$data := dict "Values" $.Values "awdawda" $val}}
+{{- include "example-backend.awdawda" $data -}}
+{{- include "example-backend.awdawda.hpa" $data -}}
+{{- end -}}
+{{- end -}}
