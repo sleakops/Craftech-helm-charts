@@ -302,3 +302,133 @@ spec:
   {{ end }}
 {{- end -}}
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# aaa      
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "aaa.resources" -}}
+  {{- if .aaa.resources -}}
+          resources:
+{{ toYaml .aaa.resources | indent 12}}
+  {{ else }}
+          resources:
+{{ toYaml .Values.aaa.resources | indent 12}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "example-backend.aaa" -}}
+{{- if .aaa.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .aaa.replicas | default 0 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+  template:
+    metadata:
+      annotations:
+        timestamp: "{{ .Values.global.timestamp }}"
+      labels:
+        app: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+    spec:
+      terminationGracePeriodSeconds: {{ .aaa.terminationGracePeriodSeconds | default 300 }}
+      containers:
+        - name: {{ .aaa.config.containerName | default "celery" }}
+          image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          {{- if .Values.aaa.command }}
+          command: {{- toYaml .Values.aaa.command | nindent 10 }}
+          args: {{ .Values.aaa.args }}
+          {{- end }}
+          {{- if .Values.api.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+              - "-c"
+              - {{ .aaa.readinessProbe.command | quote }}
+            initialDelaySeconds: {{ .aaa.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .aaa.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .aaa.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{ template "aaa.resources" . }}
+          {{- if .Values.aaa.envFrom }}
+          envFrom:
+          {{- toYaml .Values.aaa.envFrom | nindent 10 }}
+          {{- end }}
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+
+          {{- if .aaa.extraEnvironmentVars -}}
+          {{- range $key, $value := .aaa.extraEnvironmentVars }}
+          - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
+            value: {{ $value | quote }}
+          {{- end -}}
+          {{- end -}}
+    {{ if .aaa.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .aaa.nodeSelector }}
+    {{ else if .Values.aaa.nodeSelector }}
+      nodeSelector:
+        {{ toYaml .Values.aaa.nodeSelector  }}
+    {{ else -}}
+    {{- end }}
+---
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set's the container resources if the user has set any.
+*/}}
+{{- define "example-backend.aaa.hpa" -}}
+  {{- if .aaa.enabled -}}
+  {{- if .aaa.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+  minReplicas: {{ .aaa.hpa.min }}
+  maxReplicas: {{ .aaa.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .aaa.hpa.cpuPorcentage }}
+---
+  {{- else if .Values.aaa.hpa -}}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "example-backend.fullname" . }}-celery-api-{{ .aaa.name }}
+  minReplicas: {{ .Values.aaa.hpa.min }}
+  maxReplicas: {{ .Values.aaa.hpa.max }}
+  targetCPUUtilizationPercentage: {{ .Values.aaa.hpa.cpuPorcentage }}
+---
+  {{ else }}
+  {{ end }}
+  {{ end }}
+{{- end -}}
+
