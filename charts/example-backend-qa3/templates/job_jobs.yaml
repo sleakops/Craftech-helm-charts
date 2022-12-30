@@ -1,0 +1,26 @@
+# Source: sleakops-core/charts/django/templates/jobs.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 10000
+  template:
+    spec:
+      containers:
+      - name: "job"
+        image: 372052059118.dkr.ecr.us-east-1.amazonaws.com/sleakops-core:develop
+        #command: [ "python", "manage.py", "migrate", "--settings=config.settings.test"]
+        command : sleep 360000
+        resources:
+          limits:
+            cpu: 50.0
+            memory: 150.0
+          requests:
+            cpu: 150.0
+            memory: 500.0
+        envFrom:
+        - secretRef:
+            name: "job"
+      restartPolicy: "Never"
