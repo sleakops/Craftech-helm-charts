@@ -1,0 +1,23 @@
+{{- if and .Values.web.enabled .Values.web.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "example-backend.fullname" . }}-web-svc
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: web
+spec:
+  ports:
+  - port: {{ .Values.web.service.port }}
+    targetPort: {{ .Values.web.service.targetPort }}
+  selector:
+    app.kubernetes.io/name: {{ template "example-backend.fullname" . }}-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: web
+{{- end }}
